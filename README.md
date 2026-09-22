@@ -62,6 +62,31 @@ python -m http.server 8080 --bind 127.0.0.1
 
 如需 AI 对话等后端能力，另见 `gs_campus/proxy-server.js`。
 
+当前 3D 产品页采用独立业务模块维护：
+
+```text
+gs_campus/demo/
+├── accessmemory.html              # 产品页面骨架
+├── accessmemory.css               # 桌面 / 移动 / 关怀模式视觉系统
+└── js/accessmemory/
+    ├── app.js                     # 产品状态与完整交互链路
+    ├── data.js                    # 场景、道路、设施与风险样本
+    ├── route-planner.js           # 带无障碍约束的 Dijkstra 路由
+    ├── road-analyzer.js           # 可替换为真实 VLM 的影像分析接口
+    └── scene-overlay.js           # 3D 路线、POI 与 2D 拓扑图
+```
+
+### 比赛 Demo 建议流程
+
+1. 打开 3D 实景，查看设施 POI 和默认 `400 m` 无台阶路线。
+2. 切换轮椅 / 低视力 / 全盲档案，展示路线约束与语音能力。
+3. 打开“影像分析”，分析预置 GO Ultra 出行影像。
+4. AI 将道路 B 更新为 `BLOCKED`，路线自动改为 `520 m` 绕行方案。
+5. 打开“巡检”查看同步新增的高优先级风险，再演示用户主动上报。
+6. 切换 2D 路网、关怀模式与其他实景场景，说明同一份道路状态驱动不同视图。
+
+影像分析当前使用稳定 Mock，但页面只依赖统一的 `analyzeRoadMedia(file, profile, onProgress)` 接口，后续可直接替换真实多模态服务。
+
 ## 版本管理约定
 
 - **分支**：`main` 为可演示的稳定版本；功能开发走 `feat/*` 分支，验证通过后合并回 `main`。
