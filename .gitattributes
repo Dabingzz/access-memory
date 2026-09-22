@@ -1,0 +1,14 @@
+# Git LFS：大体积 3D 素材与媒体文件统一走 LFS
+# （GitHub/Gitee 单文件上限 100MB，本仓库最大 splat 约 192MB）
+*.splat  filter=lfs diff=lfs merge=lfs -text
+*.ksplat filter=lfs diff=lfs merge=lfs -text
+*.ply    filter=lfs diff=lfs merge=lfs -text
+*.glb    filter=lfs diff=lfs merge=lfs -text
+*.gltf   filter=lfs diff=lfs merge=lfs -text
+*.mp4    filter=lfs diff=lfs merge=lfs -text
+*.mp3    filter=lfs diff=lfs merge=lfs -text
+*.wav    filter=lfs diff=lfs merge=lfs -text
+*.zip    filter=lfs diff=lfs merge=lfs -text
+
+# 文本文件统一 LF，避免 Windows/macOS 混用产生噪音 diff
+* text=auto eol=lf
