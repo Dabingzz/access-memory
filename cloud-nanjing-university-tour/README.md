@@ -1,20 +1,35 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AccessMemory 展示页
 
-# Run and deploy your AI Studio app
+路忆 AccessMemory 的比赛展示页，前身为“云上南雍”校园导览落地页。当前页面已替换为 Insta360 黑客松公益赛道内容，并使用南京栖霞酒店园区的真实 `.splat` 数据生成场景预览。
 
-This contains everything you need to run your app locally.
+## 页面内容
 
-View your app in AI Studio: https://ai.studio/apps/drive/1kgICnJKHM4aw9Qr3omcUFMIK0OLlxTEQ
+- AccessMemory 品牌首屏与南京栖霞试点信息
+- X5 采集、AHOLO 重建、AI 路况理解、动态路线规划产品闭环
+- “道路 B 施工前 / AI 检测施工后”交互式自动改道演示
+- 3 个酒店园区点云场景入口
+- 公益价值与技术链路说明
 
-## Run Locally
+## 本地开发
 
-**Prerequisites:**  Node.js
+```bash
+npm install
+npm run dev
+```
 
+项目 Vite 配置使用 `http://127.0.0.1:3000`。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+页面中的 3D 链接指向 `http://127.0.0.1:8080/gs_campus/demo/accessmemory.html`。请另开终端，在仓库根目录启动静态服务器：
+
+```bash
+python -m http.server 8080 --bind 127.0.0.1
+```
+
+## 构建
+
+```bash
+npm run build
+npm run preview
+```
+
+构建产物输出到 `dist/`，不纳入 Git。

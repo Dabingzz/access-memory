@@ -19,7 +19,7 @@
 ├── .gitattributes                  # Git LFS 规则（*.splat/*.ply/*.glb/*.mp4 等大文件）
 │
 ├── cloud-nanjing-university-tour/  # 产品展示落地页（React 19 + Vite + Tailwind CDN + framer-motion）
-│   │                               #   前身为"云上南雍"南大导览展示页，正改造为 AccessMemory 展示页
+│   │                               #   前身为"云上南雍"南大导览展示页，现已改造为 AccessMemory 展示页
 │   ├── App.tsx / index.tsx / index.html
 │   ├── components/                 #   Navbar / Hero / Features / About / Footer
 │   └── public/                     #   静态图片资源
@@ -45,18 +45,19 @@
 ```bash
 cd cloud-nanjing-university-tour
 npm install        # 首次
-npm run dev        # 开发预览（Vite 默认 http://localhost:5173）
+npm run dev        # 开发预览（项目配置为 http://127.0.0.1:3000）
 npm run build      # 构建产物输出至 dist/
 ```
 
 ### 3D 地图 Demo（gs_campus）
 
-展示页中的"进入系统"按钮指向 `http://127.0.0.1:8080`，即 gs_campus 的 demo 目录：
+展示页中的“打开 3D 空间”按钮指向 AccessMemory 场景选择页。由于场景页需要同时访问 `gs_campus/` 和仓库根目录的 4 个 `.splat`，静态服务器必须从**仓库根目录**启动：
 
 ```bash
-cd gs_campus/demo
-python -m http.server 8080     # 或 npx serve -l 8080
-# 浏览器打开 http://127.0.0.1:8080
+# 在仓库根目录执行
+python -m http.server 8080 --bind 127.0.0.1
+# 浏览器打开：
+# http://127.0.0.1:8080/gs_campus/demo/accessmemory.html
 ```
 
 如需 AI 对话等后端能力，另见 `gs_campus/proxy-server.js`。

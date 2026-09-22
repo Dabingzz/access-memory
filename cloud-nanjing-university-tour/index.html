@@ -3,12 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>云上南雍 | 南京大学校园导览</title>
+    <title>路忆 AccessMemory | AI 动态无障碍地图 · Insta360 公益赛道</title>
+    <meta name="description" content="路忆 AccessMemory 是面向轮椅使用者与行动不便人群的 AI 动态无障碍地图，使用 Insta360 X5、AHOLO 三维重建与多模态 AI 规划真正可通行的路线。" />
+    <meta name="theme-color" content="#07111f" />
+    <link rel="icon" href="data:," />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+      /* AccessMemory 路忆 · 品牌调色板 */
+      :root {
+        --am-base: #0B1220;      /* 深夜底色 */
+        --am-primary: #2F6BFF;   /* 品牌主蓝（推荐路线 / 主按钮） */
+        --am-green: #22C55E;     /* OPEN 可通行 / 成功态 */
+        --am-blue: #38BDF8;      /* 科技点缀蓝（扫描光 / 焦点环） */
+        --am-yellow: #FFD100;    /* 品牌黄（CAUTION / 高亮） */
+      }
+
       body {
         font-family: 'Noto Sans SC', sans-serif;
         background-color: #ffffff;
@@ -18,11 +30,32 @@
       .font-serif {
         font-family: 'Noto Serif SC', serif;
       }
-      /* NJU Purple Customization */
-      .bg-nju-purple { background-color: #6A005F; }
-      .text-nju-purple { color: #6A005F; }
-      .border-nju-purple { border-color: #6A005F; }
-      
+
+      /* 语义工具 class：主色 */
+      .bg-am-primary { background-color: var(--am-primary); }
+      .text-am-primary { color: var(--am-primary); }
+      .border-am-primary { border-color: var(--am-primary); }
+
+      /* 语义工具 class：深色底 */
+      .bg-am-base { background-color: var(--am-base); }
+      .text-am-base { color: var(--am-base); }
+      .border-am-base { border-color: var(--am-base); }
+
+      /* 语义工具 class：状态绿 */
+      .bg-am-green { background-color: var(--am-green); }
+      .text-am-green { color: var(--am-green); }
+      .border-am-green { border-color: var(--am-green); }
+
+      /* 语义工具 class：点缀蓝 */
+      .bg-am-blue { background-color: var(--am-blue); }
+      .text-am-blue { color: var(--am-blue); }
+      .border-am-blue { border-color: var(--am-blue); }
+
+      /* 语义工具 class：品牌黄 */
+      .bg-am-yellow { background-color: var(--am-yellow); }
+      .text-am-yellow { color: var(--am-yellow); }
+      .border-am-yellow { border-color: var(--am-yellow); }
+
       /* Smooth Scrolling */
       html {
         scroll-behavior: smooth;
@@ -39,7 +72,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>

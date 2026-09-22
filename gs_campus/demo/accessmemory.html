@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>路忆 AccessMemory · 栖霞园区 3D 空间</title>
+  <link rel="icon" href="data:,">
+  <script type="importmap">
+    {"imports":{"three":"./lib/three.module.js","@mkkellogg/gaussian-splats-3d":"./lib/gaussian-splats-3d.module.js"}}
+  </script>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,"Microsoft YaHei",sans-serif;background:#07111f;color:#f8fafc}
+    *{box-sizing:border-box}body{width:100vw;height:100vh;margin:0;overflow:hidden;background:#07111f}button,select{font:inherit}
+    .bar{position:fixed;inset:20px 20px auto;z-index:20;display:flex;justify-content:space-between;gap:16px;pointer-events:none}
+    .brand,.tools,.meta{border:1px solid #ffffff29;background:#07111fd9;box-shadow:0 18px 50px #0007;backdrop-filter:blur(18px);border-radius:8px;pointer-events:auto}
+    .brand{display:flex;align-items:center;gap:12px;padding:8px 15px 8px 9px}.mark{display:grid;width:38px;height:38px;place-items:center;border-radius:7px;background:#2f6bff;font-weight:800}.brand strong,.brand span{display:block}.brand span{color:#94a3b8;font-size:11px}
+    .tools{display:flex;gap:8px;padding:8px}select,button{min-height:38px;border:1px solid #ffffff24;border-radius:6px;background:#ffffff14;color:#fff;padding:0 12px;cursor:pointer}option{background:#0f172a}button:hover{background:#ffffff26}
+    .meta{position:fixed;z-index:20;left:20px;bottom:20px;max-width:430px;padding:16px 18px}.meta p{margin:0}.eyebrow{color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:.12em}.title{margin-top:7px!important;font-size:18px;font-weight:700}.hint{margin-top:6px!important;color:#a8b4c7;font-size:12px;line-height:1.6}
+    .loading{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#07111f;transition:opacity .3s}.loading.hidden{opacity:0;pointer-events:none}.spinner{width:42px;height:42px;margin:auto;border:3px solid #38bdf833;border-top-color:#38bdf8;border-radius:50%;animation:spin .9s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:720px){.bar{flex-direction:column}.brand{align-self:flex-start}.tools{align-self:flex-end}select{max-width:185px}.meta{max-width:calc(100vw - 40px)}}
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <div class="brand"><div class="mark" aria-hidden="true">路</div><div><strong>路忆 AccessMemory</strong><span>南京 · 栖霞无障碍空间样本</span></div></div>
+    <div class="tools"><select id="scene" aria-label="选择三维场景"></select><button id="reset" type="button">重置</button><button id="fullscreen" type="button">全屏</button></div>
+  </div>
+  <aside class="meta"><p class="eyebrow">INSTA360 X5 · AHOLO RECONSTRUCTION</p><p class="title" id="title"></p><p class="hint">拖动旋转，滚轮缩放，右键平移。这里将承载坡道、入口、通道与实时路况 POI。</p></aside>
+  <div class="loading" id="loading" role="status"><div><div class="spinner" aria-hidden="true"></div><p id="message">正在载入真实空间…</p></div></div>
+  <script type="module">
+    import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
+    const scenes=[
+      {id:'entrance',label:'园区入口与景观步道',file:'/1现代建筑园区入口与景观步道.splat'},
+      {id:'corridor',label:'新中式酒店走廊',file:'/2新中式酒店走廊(1).splat'},
+      {id:'courtyard',label:'酒店内庭与连接空间',file:'/3.splat'},
+      {id:'lakeside',label:'湖畔度假区入口与园林',file:'/4湖畔度假区入口与园林.splat'}
+    ];
+    const params=new URLSearchParams(location.search);const index=Math.max(0,scenes.findIndex(x=>x.id===params.get('scene')));const active=scenes[index];const select=document.getElementById('scene');
+    scenes.forEach((x,i)=>select.add(new Option(`${i+1}. ${x.label}`,x.id,i===index,i===index)));document.getElementById('title').textContent=active.label;
+    select.onchange=()=>{const url=new URL(location.href);url.searchParams.set('scene',select.value);location.href=url};
+    const viewer=window.accessMemoryViewer=new GaussianSplats3D.Viewer({cameraUp:[0,-1,0],initialCameraPosition:[180,-110,180],initialCameraLookAt:[0,0,0],sphericalHarmonicsDegree:0,sharedMemoryForWorkers:false,renderMode:GaussianSplats3D.RenderMode.OnChange,sceneRevealMode:GaussianSplats3D.SceneRevealMode.Instant});
+    const home={position:[180,-110,180],target:[0,0,0]};
+    const applyHome=()=>{viewer.camera.position.set(...home.position);viewer.controls.target.set(...home.target);viewer.camera.lookAt(viewer.controls.target);viewer.controls.update()};
+    document.getElementById('reset').onclick=applyHome;
+    document.getElementById('fullscreen').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+    viewer.addSplatScene(encodeURI(active.file),{progressiveLoad:false,showLoadingUI:false}).then(()=>{
+      const center=viewer.splatMesh.calculatedSceneCenter;
+      const distance=Math.max(24,viewer.splatMesh.maxSplatDistanceFromSceneCenter*2.25);
+      home.target=center.toArray();
+      home.position=[center.x+distance*.62,center.y-distance*.38,center.z+distance*.62];
+      viewer.renderer.setClearColor(0x07111f,1);
+      applyHome();
+      viewer.start();
+      document.getElementById('loading').classList.add('hidden');
+    }).catch(error=>{console.error(error);document.getElementById('message').textContent='场景载入失败，请从仓库根目录启动本地服务器。'});
+  </script>
+</body>
+</html>

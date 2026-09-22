@@ -1,75 +1,82 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Cpu, Globe, Rocket, Shield } from 'lucide-react';
+import { Accessibility, BrainCircuit, Camera, HeartHandshake, RefreshCw, Waypoints } from 'lucide-react';
 
-const About: React.FC = () => {
-  return (
-    <section id="about" className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background Image with Blur */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="w-full h-full absolute inset-0 bg-cover bg-center filter blur-[3px]"
-          style={{ backgroundImage: `url(/301.jpg)` }}
-        />
-        <div className="absolute inset-0 bg-black/60"></div>
-      </div>
+const values = [
+  {
+    icon: Accessibility,
+    title: '为行动不便者而设计',
+    text: '路线不只比较距离，还把台阶、坡度、宽度、路面和实时障碍纳入判断。',
+  },
+  {
+    icon: RefreshCw,
+    title: '道路状态持续更新',
+    text: '用户上报与 GO Ultra 出行影像不断补充现场信息，降低“地图已过期”的风险。',
+  },
+  {
+    icon: HeartHandshake,
+    title: '把真实出行变成公共贡献',
+    text: '一次观察可以帮助下一位使用者更确定地出门，让无障碍信息越用越准确。',
+  },
+];
 
-      <div className="container mx-auto px-6 relative z-10 pt-20">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-8 text-white">
-              关于 <span className="text-purple-300">云上南雍</span>
-            </h2>
-            <div className="space-y-6 text-gray-200 text-lg leading-relaxed font-light mb-12">
-              <p>
-                “云上南雍”不仅仅是一个地图导航，它是南京大学精神风貌的数字化延伸。我们整合了高精度倾斜摄影、WebGL实时渲染与大语言模型技术，将鼓楼校区的古朴典雅与仙林校区的现代宏大完美复刻于云端。
-              </p>
-              <p>
-                在这里，每一块青砖都承载着百年的记忆，每一条道路都通往未来的可能。无论您是远道而来的访客、即将入学的学子，还是心系母校的校友，都能通过本系统跨越视空限制，身临其境地感受“诚朴雄伟，励学敦行”的南大校训，开启一场属于您的数字化百年校庆之旅。
-              </p>
-            </div>
-
-            {/* Core Tech Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-              {[
-                { icon: Globe, label: "WebGL 渲染", desc: "极致 3D 视觉体验" },
-                { icon: Cpu, label: "AI 交互", desc: "智慧校园数字大脑" },
-                { icon: Rocket, label: "5G 接入", desc: "极速漫游低延迟" },
-                { icon: Shield, label: "生活助手", desc: "帮助你在校园立足" }
-              ].map((tech, i) => (
-                <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:bg-white/10 transition-colors">
-                  <tech.icon className="w-8 h-8 text-purple-300 mb-3 mx-auto" />
-                  <h4 className="text-white font-bold text-sm mb-1">{tech.label}</h4>
-                  <p className="text-white/40 text-xs">{tech.desc}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Integrated Footer Content with larger margin */}
-        <div className="mt-48 border-t border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center text-white/50">
-          <div className="flex flex-col md:flex-row gap-8 items-center mb-8 md:mb-0">
-            <span className="font-serif text-lg text-white/80">云上南雍</span>
-            <div className="flex gap-6 text-sm">
-              <a href="#" className="hover:text-white transition-colors">联系我们</a>
-              <a href="#" className="hover:text-white transition-colors">使用帮助</a>
-              <a href="#" className="hover:text-white transition-colors">反馈建议</a>
-            </div>
-          </div>
-          <p className="text-xs">
-            © {new Date().getFullYear()} 南京大学. All Rights Reserved.
+const About: React.FC = () => (
+  <section id="about" className="bg-[#eef3f4] py-24 lg:py-32">
+    <div className="mx-auto max-w-[1320px] px-5 lg:px-8">
+      <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+        <motion.div initial={false} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <p className="text-xs font-bold tracking-[0.14em] text-[#1f6f5f]">WHY ACCESSMEMORY</p>
+          <h2 className="mt-4 text-4xl font-bold leading-tight text-[#14202b] lg:text-5xl">让“确定地出门”成为日常</h2>
+          <p className="mt-7 text-base leading-8 text-[#60717c] lg:text-lg">
+            对多数人来说，几百米只是一段路；对轮椅使用者来说，一处没有坡道的台阶、一辆占住入口的汽车、一次临时施工，都可能意味着原路返回。
           </p>
+          <p className="mt-5 text-base leading-8 text-[#60717c] lg:text-lg">
+            路忆不试图先做一张庞大的城市地图，而是从南京栖霞的真实园区开始，把“看见现场、理解路况、规划路线、持续更新”这个闭环完整跑通。
+          </p>
+
+          <blockquote className="mt-10 border-l-4 border-[#ffd100] pl-6 text-2xl font-bold leading-relaxed text-[#14202b] lg:text-3xl">
+            每一次真实出行，<br />都在帮助下一次出行。
+          </blockquote>
+        </motion.div>
+
+        <div className="border-t border-[#c8d4d7]">
+          {values.map((item, index) => (
+            <motion.article
+              key={item.title}
+              initial={false}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08 }}
+              className="grid gap-5 border-b border-[#c8d4d7] py-7 sm:grid-cols-[56px_1fr]"
+            >
+              <span className="grid h-12 w-12 place-items-center rounded-[7px] bg-white text-[#2f6bff] shadow-sm">
+                <item.icon className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <div><h3 className="text-xl font-bold text-[#14202b]">{item.title}</h3><p className="mt-2 text-sm leading-7 text-[#60717c]">{item.text}</p></div>
+            </motion.article>
+          ))}
         </div>
       </div>
-    </section>
-  );
-};
+
+      <div className="mt-20 grid overflow-hidden rounded-[8px] border border-[#c8d4d7] bg-white md:grid-cols-3">
+        <div className="p-7 md:border-r md:border-[#d9e2e4]">
+          <Camera className="h-6 w-6 text-[#2f6bff]" aria-hidden="true" />
+          <p className="mt-5 text-xs font-bold tracking-[0.12em] text-[#60717c]">REAL SPACE</p>
+          <p className="mt-2 font-bold">Insta360 X5 + AHOLO</p>
+        </div>
+        <div className="border-t border-[#d9e2e4] p-7 md:border-r md:border-t-0">
+          <BrainCircuit className="h-6 w-6 text-[#1f8a63]" aria-hidden="true" />
+          <p className="mt-5 text-xs font-bold tracking-[0.12em] text-[#60717c]">ROAD AWARENESS</p>
+          <p className="mt-2 font-bold">多模态 AI 路况理解</p>
+        </div>
+        <div className="border-t border-[#d9e2e4] p-7 md:border-t-0">
+          <Waypoints className="h-6 w-6 text-[#d38a00]" aria-hidden="true" />
+          <p className="mt-5 text-xs font-bold tracking-[0.12em] text-[#60717c]">ACCESSIBLE ROUTING</p>
+          <p className="mt-2 font-bold">状态约束的动态路线规划</p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
 export default About;

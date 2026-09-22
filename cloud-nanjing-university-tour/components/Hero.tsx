@@ -1,154 +1,111 @@
-import React, { useRef, useMemo } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, MapPin, Zap, ExternalLink, Sparkles, Bot, Landmark } from 'lucide-react';
+import React from 'react';
+import { ArrowDown, ArrowRight, CircleCheck, ExternalLink, MapPin, Radio } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ACCESS_MEMORY_3D_URL } from '../config';
 
-// Restore Glowing Particles for Dark Background - Tinted Gold
-const Particle: React.FC<{ index: number }> = ({ index }) => {
-  const randomX = useMemo(() => Math.random() * 100, []);
-  const randomY = useMemo(() => Math.random() * 100, []);
-  const duration = useMemo(() => 10 + Math.random() * 20, []);
-  const delay = useMemo(() => Math.random() * 5, []);
-  const size = useMemo(() => 2 + Math.random() * 3, []);
-
-  return (
-    <motion.div
-      className="absolute rounded-full bg-[#D4AF37]" // Gold particles
-      style={{
-        left: `${randomX}%`,
-        top: `${randomY}%`,
-        width: size,
-        height: size,
-        opacity: 0.3,
-        boxShadow: `0 0 ${size * 2}px #D4AF37`,
-      }}
-      animate={{
-        y: [0, -100, 0],
-        opacity: [0.2, 0.6, 0.2],
-        scale: [1, 1.2, 1],
-      }}
-      transition={{
-        duration: duration,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: delay,
-      }}
+const Hero: React.FC = () => (
+  <section className="relative flex min-h-[760px] items-end overflow-hidden bg-[#07111f] pt-[72px] lg:min-h-[820px] lg:h-[94vh]">
+    <img
+      src="/accessmemory-qixia-scene.jpg"
+      alt="由酒店园区高斯泼溅模型生成的栖霞景观步道点云"
+      className="absolute inset-0 h-full w-full object-cover object-center"
     />
-  );
-};
+    <div className="absolute inset-0 bg-[#04101a]/62" aria-hidden="true" />
+    <div className="absolute inset-y-0 left-0 w-[58%] bg-[#04101a]/45" aria-hidden="true" />
 
-// Shooting Star Component - Gold
-const ShootingStar: React.FC = () => {
-  return (
-    <motion.div
-      className="absolute h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent"
-      initial={{ x: -100, y: -100, opacity: 0 }}
-      animate={{ x: 800, y: 800, opacity: [0, 1, 0] }}
-      transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
-      style={{ width: '150px', transform: 'rotate(45deg)' }}
-    />
-  )
-}
-
-
-const Hero: React.FC = () => {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-
-  // Generate particles
-  const particles = Array.from({ length: 30 }).map((_, i) => <Particle key={i} index={i} />);
-
-  return (
-    <section
-      ref={ref}
-      className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-[#2e0e2e]" // Deep purple base
-    >
-      {/* Background - Official NJU Colors Atmosphere */}
-      <div className="absolute inset-0 z-0">
-        {/* Main Background Image - Darkened */}
+    <div className="relative z-10 mx-auto w-full max-w-[1320px] px-5 pb-8 pt-24 lg:px-8 lg:pb-10">
+      <div className="max-w-[820px] pb-16 lg:pb-20">
         <motion.div
-          style={{ y, scale: 1.1 }}
-          className="absolute inset-0 bg-[url('/300.jpg')] bg-cover bg-center"
-        >
-          <div className="absolute inset-0 bg-black/30"></div>
-        </motion.div>
-
-        {/* Animated Gradient Orbs - Purple & Gold */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#63065E] blur-[150px] opacity-40 animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#D4AF37] blur-[150px] opacity-20 animate-pulse delay-1000"></div>
-
-        {/* Particles */}
-        <div className="absolute inset-0 z-10">{particles}</div>
-        <ShootingStar />
-      </div>
-
-      {/* Content */}
-      <motion.div
-        className="relative z-20 text-center px-4 max-w-5xl mx-auto space-y-8"
-      >
-        {/* Motto */}
-        <motion.div
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: -20 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="flex items-center justify-center gap-4 text-[#D4AF37] font-serif font-bold tracking-[0.5em] text-lg md:text-xl"
-        >
-          <span className="h-[1px] w-12 bg-[#D4AF37]/70"></span>
-          <span>诚朴雄伟 励学敦行</span>
-          <span className="h-[1px] w-12 bg-[#D4AF37]/70"></span>
-        </motion.div>
-
-        {/* Main Title */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, type: "spring" }}
-        >
-          <h1 className="text-6xl md:text-8xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/80 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] tracking-wide mb-2">
-            云上南雍
-          </h1>
-
-        </motion.div>
-
-        {/* Main Action - Unified Style with Dock */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="flex flex-col md:flex-row items-center justify-center gap-6 mt-12"
+          transition={{ duration: 0.55 }}
+          className="mb-7 flex flex-wrap items-center gap-3 text-xs font-bold tracking-[0.08em] text-white/80"
         >
-          <button
-            onClick={() => window.open('http://127.0.0.1:8080', '_blank')}
-            className="px-12 py-5 bg-[#63065E]/30 backdrop-blur-xl hover:bg-[#63065E]/50 text-white rounded-full font-bold text-xl transition-all shadow-[0_0_30px_rgba(99,6,94,0.2)] hover:shadow-[0_0_40px_rgba(99,6,94,0.4)] flex items-center gap-3 border border-white/10 group"
-          >
-            <Sparkles className="w-6 h-6 group-hover:animate-pulse" /> 开启漫游
-          </button>
+          <span className="inline-flex items-center gap-2 rounded-[6px] border border-[#ffd100]/60 bg-[#ffd100]/10 px-3 py-2 text-[#ffe45c]">
+            <Radio className="h-4 w-4" aria-hidden="true" />
+            INSTA360 黑客松 · 公益赛道
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-[6px] border border-white/20 bg-black/20 px-3 py-2">
+            <MapPin className="h-4 w-4 text-[#58d29d]" aria-hidden="true" />
+            首个实景样本 · 南京栖霞
+          </span>
         </motion.div>
 
-
-      </motion.div>
-
-      {/* Scroll Hint */}
-      <div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer"
-        onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="text-white/80 flex flex-col items-center gap-2 text-center"
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.08 }}
+          className="font-serif text-6xl font-bold leading-[0.95] text-white sm:text-7xl lg:text-[104px]"
         >
-          <span className="text-xs uppercase tracking-widest font-medium whitespace-nowrap">Scroll to Explore Core Modules</span>
-          <ArrowDown className="w-6 h-6" />
+          路忆
+          <span className="mt-4 block font-sans text-xl font-semibold tracking-[0.1em] text-[#79dcb2] sm:text-2xl lg:text-3xl">
+            AccessMemory
+          </span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.18 }}
+          className="mt-8 max-w-[760px] text-2xl font-semibold leading-tight text-white sm:text-3xl lg:text-4xl"
+        >
+          这条路，现在能走吗？
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.26 }}
+          className="mt-5 max-w-[700px] text-base leading-8 text-white/70 sm:text-lg"
+        >
+          用 Insta360 X5 看见真实空间，用 AHOLO 重建园区，用 AI 判断施工、占道与坡道状态，
+          为轮椅使用者和行动不便人群规划一条此刻真正可通行的路线。
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.34 }}
+          className="mt-9 flex flex-col gap-3 sm:flex-row"
+        >
+          <a
+            href="#demo"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[7px] bg-[#ffd100] px-6 font-bold text-[#17202a] transition-colors hover:bg-[#ffe04d]"
+          >
+            看路线如何自动改道
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
+          </a>
+          <a
+            href={ACCESS_MEMORY_3D_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[7px] border border-white/35 bg-black/20 px-6 font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+          >
+            浏览栖霞 3D 空间
+            <ExternalLink className="h-5 w-5" aria-hidden="true" />
+          </a>
         </motion.div>
       </div>
-    </section>
-  );
-};
+
+      <div className="grid border-y border-white/20 bg-[#07111f]/45 backdrop-blur-md sm:grid-cols-3">
+        <div className="flex items-center gap-3 px-4 py-4 sm:border-r sm:border-white/20 lg:px-6">
+          <CircleCheck className="h-5 w-5 shrink-0 text-[#58d29d]" aria-hidden="true" />
+          <div><strong className="block text-sm text-white">4 个真实重建场景</strong><span className="text-xs text-white/60">酒店入口、走廊、园林与湖畔</span></div>
+        </div>
+        <div className="flex items-center gap-3 border-t border-white/20 px-4 py-4 sm:border-r sm:border-t-0 sm:border-white/20 lg:px-6">
+          <CircleCheck className="h-5 w-5 shrink-0 text-[#58d29d]" aria-hidden="true" />
+          <div><strong className="block text-sm text-white">动态路况状态</strong><span className="text-xs text-white/60">OPEN · CAUTION · BLOCKED</span></div>
+        </div>
+        <div className="flex items-center gap-3 border-t border-white/20 px-4 py-4 sm:border-t-0 lg:px-6">
+          <CircleCheck className="h-5 w-5 shrink-0 text-[#58d29d]" aria-hidden="true" />
+          <div><strong className="block text-sm text-white">路线自动重规划</strong><span className="text-xs text-white/60">异常出现后避开不可通行路段</span></div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#workflow" className="absolute bottom-3 right-5 z-20 hidden items-center gap-2 text-xs font-bold tracking-[0.12em] text-white/60 md:flex lg:right-8">
+      PRODUCT LOOP <ArrowDown className="h-4 w-4" aria-hidden="true" />
+    </a>
+  </section>
+);
 
 export default Hero;
