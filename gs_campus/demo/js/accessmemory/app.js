@@ -5,6 +5,7 @@ import { createDemoState, getSceneData, profiles, scenes } from './data.js';
 import { FirstPersonExplorer } from './first-person-explorer.js';
 import { getPreferencesFromUI, planAccessibleRoute } from './route-planner.js';
 import { renderTopologyMap, SceneOverlay } from './scene-overlay.js';
+import { addSkyEnvironment } from './sky-environment.js';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -34,6 +35,7 @@ const viewer = window.accessMemoryViewer = new GaussianSplats3D.Viewer({
   renderMode: GaussianSplats3D.RenderMode.Always,
   sceneRevealMode: GaussianSplats3D.SceneRevealMode.Instant
 });
+addSkyEnvironment(viewer);
 const explorer = new FirstPersonExplorer(viewer, activeScene, updateExploreUI);
 
 function initializeControls() {
@@ -612,7 +614,7 @@ async function loadScene() {
   try {
     await viewer.addSplatScene(encodeURI(activeScene.file), { progressiveLoad: false, showLoadingUI: false });
     viewer.splatMesh.setSplatScale(activeScene.splatScale || 1);
-    viewer.renderer.setClearColor(0x161817, 1); applyHome(); viewer.start();
+    viewer.renderer.setClearColor(0x91c9e8, 1); applyHome(); viewer.start();
     viewer.controls.enableDamping = true;
     viewer.controls.dampingFactor = 0.08;
     viewer.controls.rotateSpeed = 0.55;

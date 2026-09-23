@@ -49,8 +49,8 @@ export class SceneOverlay {
     });
     if (!route || route.nodes.length < 2) return;
     const points = route.nodes.map(id => this.worldPoint(id));
-    const halo = this.makeTube(points, 0.38, new THREE.MeshBasicMaterial({ color: 0x101713, transparent: true, opacity: 0.68, depthTest: false, depthWrite: false }));
-    const line = this.makeTube(points, 0.22, new THREE.MeshBasicMaterial({ color: 0x27dff5, depthTest: false, depthWrite: false }));
+    const halo = this.makeTube(points, 0.38, new THREE.MeshBasicMaterial({ color: 0x073946, transparent: true, opacity: 0.68, depthTest: false, depthWrite: false }));
+    const line = this.makeTube(points, 0.22, new THREE.MeshBasicMaterial({ color: 0x2dd5e7, depthTest: false, depthWrite: false }));
     halo.renderOrder = 910; line.renderOrder = 911;
     this.group.add(halo, line);
     const cursor = new THREE.Mesh(new THREE.SphereGeometry(0.5, 18, 18), new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false }));
@@ -181,19 +181,19 @@ export function renderTopologyMap(svg, edges, route, nodes, sceneLabel) {
     y: 130 + ((nodes[id].position[2] - minZ) / rangeZ) * 460
   });
   const routeIds = new Set(route?.edges.map(item => item.id) || []);
-  const colors = { OPEN: '#667069', CAUTION: '#d29a1f', BLOCKED: '#d63b35', UNKNOWN: '#a8aaa4' };
+  const colors = { OPEN: '#4d7b78', CAUTION: '#d29a1f', BLOCKED: '#d63b35', UNKNOWN: '#92abb1' };
   const edgeMarkup = edges.map(item => {
     const from = point(item.from); const to = point(item.to);
     return `<g><line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="${colors[item.status]}" stroke-width="${item.status === 'BLOCKED' ? 12 : 7}" stroke-dasharray="${item.status === 'UNKNOWN' ? '12 10' : ''}"/><title>${item.label} · ${item.status}</title></g>`;
   }).join('');
   const routeMarkup = edges.filter(item => routeIds.has(item.id)).map(item => {
     const from = point(item.from); const to = point(item.to);
-    return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#1c1d1a" stroke-width="22" stroke-linecap="round"/><line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#25d9f2" stroke-width="11" stroke-linecap="round"/>`;
+    return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#073946" stroke-width="22" stroke-linecap="round"/><line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#2dd5e7" stroke-width="11" stroke-linecap="round"/>`;
   }).join('');
   const important = new Set(['entrance', 'destination', 'elevator', 'restroom', 'ramp', 'rest']);
   const nodeMarkup = values.map(item => {
     const pos = point(item.id); const key = important.has(item.type);
-    return `<g><circle cx="${pos.x}" cy="${pos.y}" r="${key ? 12 : 7}" fill="${key ? '#171815' : '#f4f3ed'}" stroke="#171815" stroke-width="3"/><text x="${pos.x + 14}" y="${pos.y - 11}" fill="#252621" font-size="${key ? 16 : 12}" font-weight="${key ? 700 : 500}">${item.short}</text></g>`;
+    return `<g><circle cx="${pos.x}" cy="${pos.y}" r="${key ? 12 : 7}" fill="${key ? '#0d6172' : '#f5fbfc'}" stroke="#0b4656" stroke-width="3"/><text x="${pos.x + 14}" y="${pos.y - 11}" fill="#14323b" font-size="${key ? 16 : 12}" font-weight="${key ? 700 : 500}">${item.short}</text></g>`;
   }).join('');
-  svg.innerHTML = `<rect width="1000" height="700" rx="16" fill="#e9e8e1"/><path d="M55 130H945M55 590H945" stroke="#d0d0c8"/><path d="M100 85V625M900 85V625" stroke="#d0d0c8"/><text x="58" y="74" fill="#555850" font-size="13" letter-spacing="2">${sceneLabel.toUpperCase()} / ACCESSIBLE NETWORK</text><text x="942" y="74" text-anchor="end" fill="#777a72" font-size="12">${values.length} 地点 · ${edges.length} 路段</text>${edgeMarkup}${routeMarkup}${nodeMarkup}`;
+  svg.innerHTML = `<rect width="1000" height="700" rx="16" fill="#e4f1f3"/><path d="M55 130H945M55 590H945" stroke="#c5dde1"/><path d="M100 85V625M900 85V625" stroke="#c5dde1"/><text x="58" y="74" fill="#315d67" font-size="13" letter-spacing="2">${sceneLabel.toUpperCase()} / ACCESSIBLE NETWORK</text><text x="942" y="74" text-anchor="end" fill="#607d84" font-size="12">${values.length} 地点 · ${edges.length} 路段</text>${edgeMarkup}${routeMarkup}${nodeMarkup}`;
 }

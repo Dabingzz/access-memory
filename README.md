@@ -74,6 +74,7 @@ gs_campus/demo/
     ├── route-planner.js           # 带无障碍约束的 Dijkstra 路由
     ├── road-analyzer.js           # 可替换为真实 VLM 的影像分析接口
     ├── first-person-explorer.js   # 沿已核验道路的第一视角移动与连续转场
+    ├── sky-environment.js         # 程序化蓝天、云层与地平线天空穹顶
     └── scene-overlay.js           # 3D 路线、POI 与 2D 拓扑图
 ```
 
