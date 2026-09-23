@@ -144,6 +144,17 @@ export const sceneCatalog = [
       { key: '3', label: '主楼入口', target: [28, 0, 2], position: [50, -14, 25], nodeId: 'main' },
       { key: '4', label: '缓坡侧门', target: [13, 0, -12], position: [31, -11, 10], nodeId: 'ramp' }
     ],
+    exploration: {
+      label: '入口景观无障碍步道', eyeHeight: 5, walkSpeed: 7, lateralLimit: 1.8, splatScale: 0.52,
+      path: ['gate', 'dropoff', 'garden', 'fork'], startNodeId: 'dropoff',
+      stops: [
+        { nodeId: 'gate', label: '园区入口', status: 'open', detail: '右侧平缓路缘' },
+        { nodeId: 'dropoff', label: '无台阶落客', status: 'open', detail: '车辆接驳后可平层进入' },
+        { nodeId: 'garden', label: '平整步道', status: 'open', detail: '连续硬质路面' },
+        { nodeId: 'steps', anchorNodeId: 'fork', label: '入口台阶', status: 'blocked', detail: '轮椅需避开此近路' },
+        { nodeId: 'main', anchorNodeId: 'fork', label: '主楼入口', status: 'open', detail: '在岔路观察右侧无台阶入口' }
+      ]
+    },
     facilities: [facility('gate', '门', '入口右侧路缘平缓'), facility('dropoff', '落', '无台阶落客接驳'), facility('parking', 'P', '疑似无障碍停车位，待核验', ROAD_STATUS.UNKNOWN), facility('garden', '路', '连续平整景观步道'), facility('rest', '休', '树荫休憩空间'), facility('ramp', '坡', '主楼缓坡连接'), facility('service', '门', '无台阶侧入口'), facility('restroom', '厕', '室内方向待核验', ROAD_STATUS.UNKNOWN)],
     risks: [risk('entrance-steps', 'fork-steps', 'HIGH', '主入口台阶', '正门近路包含台阶，轮椅需绕行侧入口'), risk('parking-check', 'dropoff-parking', 'MEDIUM', '停车候选区', '停车标识与通道宽度需要现场复核')],
     analysis: { edgeId: 'fork-main', place: '主楼正门通道', reason: '检测到施工围挡占据主要轮椅通行区域' }
@@ -158,6 +169,17 @@ export const sceneCatalog = [
       { key: '3', label: '休息厅', target: [10, 0, 7], position: [52, -22, 47], nodeId: 'lounge' },
       { key: '4', label: '电梯前厅', target: [39, 0, 8], position: [81, -22, 48], nodeId: 'elevator' }
     ],
+    exploration: {
+      enabled: false, label: '酒店平层连廊', eyeHeight: 4.5, walkSpeed: 6, lateralLimit: 1.4, splatScale: 0.48,
+      path: ['west', 'gardenDoor', 'restNook', 'mid', 'turn', 'service', 'restroom', 'elevator', 'guestWing'], startNodeId: 'gardenDoor',
+      stops: [
+        { nodeId: 'gardenDoor', label: '平层玻璃门', status: 'open', detail: '庭院侧无台阶入口' },
+        { nodeId: 'restNook', label: '休息凹间', status: 'open', detail: '沿途可短暂停留' },
+        { nodeId: 'threshold', anchorNodeId: 'turn', label: '门槛高差', status: 'caution', detail: '客房近路存在高差' },
+        { nodeId: 'restroom', label: '无障碍卫生间', status: 'open', detail: '服务通道平层可达' },
+        { nodeId: 'elevator', label: '电梯候梯区', status: 'open', detail: '低位呼梯按钮在门侧' }
+      ]
+    },
     facilities: [facility('west', '门', '走廊西侧平层入口'), facility('gardenDoor', '门', '庭院侧玻璃门'), facility('restNook', '休', '走廊休息凹间'), facility('lounge', '休', '公共休息空间'), facility('service', '路', '无台阶服务通道'), facility('restroom', '厕', '无障碍卫生间'), facility('elevator', '梯', '垂直电梯候梯区'), facility('guestWing', '门', '客房区平层入口')],
     risks: [risk('corridor-narrow', 'turn-lounge', 'MEDIUM', '休息厅转角', '家具缩小有效通行宽度'), risk('threshold-risk', 'lounge-threshold', 'MEDIUM', '客房近路门槛', '门槛存在轻微高差，建议轮椅绕行服务通道')],
     analysis: { edgeId: 'turn-service', place: '无台阶服务通道', reason: '检测到保洁车辆占用主要轮椅通行区域' }
@@ -172,6 +194,17 @@ export const sceneCatalog = [
       { key: '3', label: '环形座区', target: [15, 0, 4], position: [57, -26, 46], nodeId: 'seating' },
       { key: '4', label: '东侧连廊', target: [30, 0, -7], position: [72, -26, 33], nodeId: 'eastHall' }
     ],
+    exploration: {
+      enabled: false, label: '内庭无台阶环廊', eyeHeight: 4.5, walkSpeed: 5.5, lateralLimit: 1.5, splatScale: 0.46,
+      path: ['lobby', 'gallery', 'atrium', 'turning', 'eastHall'], startNodeId: 'gallery',
+      stops: [
+        { nodeId: 'lobby', label: '大堂平层接口', status: 'open', detail: '室内外连续通行' },
+        { nodeId: 'gallery', label: '内庭环廊', status: 'open', detail: '连续室内通道' },
+        { nodeId: 'atrium', label: '中央开阔区', status: 'open', detail: '轮椅会车空间充足' },
+        { nodeId: 'turning', label: '轮椅转身区', status: 'open', detail: '预留转身空间' },
+        { nodeId: 'levelChange', anchorNodeId: 'turning', label: '地面高差', status: 'caution', detail: '南侧衔接处需低速' }
+      ]
+    },
     facilities: [facility('lobby', '门', '大堂平层连接'), facility('gallery', '廊', '连续室内环廊'), facility('atrium', '转', '中央开阔通行区'), facility('seating', '休', '环形休息座区'), facility('turning', '转', '轮椅转身空间'), facility('glassDoor', '门', '庭院玻璃门'), facility('liftDirection', '梯', '电梯方向指引'), facility('restroomDirection', '厕', '方向标识待复核', ROAD_STATUS.UNKNOWN)],
     risks: [risk('glass-narrow', 'seating-glass', 'MEDIUM', '庭院玻璃门前', '座椅靠近通道，通行宽度偏窄'), risk('level-change', 'turning-level', 'MEDIUM', '南侧地面高差', '地面衔接存在可见高差')],
     analysis: { edgeId: 'atrium-turning', place: '中央开阔通道', reason: '检测到移动座椅占用轮椅转身与通行区域' }
@@ -186,6 +219,18 @@ export const sceneCatalog = [
       { key: '3', label: '湖畔步道', target: [3, 0, 15], position: [28, -14, 41], nodeId: 'shore' },
       { key: '4', label: '园林小桥', target: [12, 0, 48], position: [37, -14, 73], nodeId: 'bridge' }
     ],
+    exploration: {
+      label: '湖畔无障碍主步道', eyeHeight: 5, walkSpeed: 7, lateralLimit: 2, splatScale: 0.52,
+      path: ['hotel', 'ramp', 'gazebo', 'bend', 'shore', 'deck', 'guardrail', 'eastGate'], startNodeId: 'ramp',
+      stops: [
+        { nodeId: 'ramp', label: '园林缓坡', status: 'open', detail: '入口无台阶接驳' },
+        { nodeId: 'gazebo', label: '林下观景亭', status: 'open', detail: '有顶休息空间' },
+        { nodeId: 'shore', label: '湖畔宽步道', status: 'open', detail: '主路连续且宽度充足' },
+        { nodeId: 'guardrail', label: '临水护栏', status: 'caution', detail: '低视力用户建议语音提醒' },
+        { nodeId: 'stonePath', anchorNodeId: 'shore', label: '石板园路', status: 'caution', detail: '拼缝较多，请低速通过' },
+        { nodeId: 'eastGate', label: '东侧入口', status: 'open', detail: '主步道终点平层可达' }
+      ]
+    },
     facilities: [facility('hotel', '门', '酒店侧园林入口'), facility('ramp', '坡', '园林缓坡接驳'), facility('gazebo', '休', '有顶观景休息点'), facility('shore', '路', '湖畔宽步道'), facility('deck', '休', '亲水休憩平台'), facility('guardrail', '护', '临水护栏连续段'), facility('bridge', '桥', '园林小桥连接'), facility('restPoint', '休', '树荫休息点')],
     risks: [risk('water-edge', 'deck-guardrail', 'MEDIUM', '临水护栏段', '临水路段建议低视力用户开启语音提醒'), risk('stone-road', 'rest-stone', 'MEDIUM', '石板园路', '拼缝较多，轮椅建议低速通过')],
     analysis: { edgeId: 'bend-shore', place: '湖畔主步道西段', reason: '检测到养护车辆临时占用湖畔主步道' }

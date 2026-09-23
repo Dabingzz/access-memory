@@ -19,6 +19,9 @@ export class SceneOverlay {
     this.group.name = 'accessmemory-overlays';
     this.labels = [];
     this.animationFrame = null;
+    this.cameraAnimationToken = 0;
+    this.cameraAnimationControlsWereEnabled = null;
+    this.lastCameraAnimationFrame = 0;
     viewer.threeScene.add(this.group);
   }
 
@@ -80,6 +83,23 @@ export class SceneOverlay {
     });
   }
 
+  setExplorationMode(active, stops = []) {
+    const stopByNode = new Map(stops.map(stop => [stop.nodeId, stop]));
+    this.group.visible = !active;
+    this.labels.forEach(label => {
+      const stop = stopByNode.get(label.nodeId);
+      label.element.classList.toggle('is-explore-stop', active && Boolean(stop));
+      label.element.classList.toggle('is-muted', active && !stop);
+      delete label.element.dataset.exploreStatus;
+      if (active && stop) {
+        label.element.dataset.exploreStatus = stop.status;
+        label.element.title = `${stop.label}：${stop.detail}`;
+      } else {
+        label.element.title = `定位到${this.nodes[label.nodeId].label}`;
+      }
+    });
+  }
+
   startProjectionLoop() {
     cancelAnimationFrame(this.animationFrame);
     const update = () => {
@@ -97,20 +117,45 @@ export class SceneOverlay {
     update();
   }
 
-  flyTo(position, target, duration = 720) {
+  cancelCameraAnimation() {
+    this.cameraAnimationToken += 1;
+    if (this.cameraAnimationControlsWereEnabled !== null) {
+      this.viewer.controls.enabled = this.cameraAnimationControlsWereEnabled;
+      this.cameraAnimationControlsWereEnabled = null;
+    }
+  }
+
+  flyTo(position, target, duration) {
     const camera = this.viewer.camera;
     const startPosition = camera.position.clone(); const startTarget = this.viewer.controls.target.clone();
     const endPosition = new THREE.Vector3(...position); const endTarget = new THREE.Vector3(...target);
+    const travel = startPosition.distanceTo(endPosition);
+    const flightDuration = duration || THREE.MathUtils.clamp(850 + travel * 9, 950, 1800);
+    const token = ++this.cameraAnimationToken;
+    const controlsWereEnabled = this.cameraAnimationControlsWereEnabled ?? this.viewer.controls.enabled;
+    this.cameraAnimationControlsWereEnabled = controlsWereEnabled;
+    this.viewer.controls.enabled = false;
     const started = performance.now();
-    const animate = now => {
-      const progress = Math.min(1, (now - started) / duration);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      camera.position.lerpVectors(startPosition, endPosition, eased);
-      this.viewer.controls.target.lerpVectors(startTarget, endTarget, eased);
-      camera.lookAt(this.viewer.controls.target); this.viewer.controls.update();
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
+    return new Promise(resolve => {
+      const animate = now => {
+        if (token !== this.cameraAnimationToken) { resolve(false); return; }
+        if (now - this.lastCameraAnimationFrame < 32) { requestAnimationFrame(animate); return; }
+        this.lastCameraAnimationFrame = now;
+        const progress = Math.min(1, (now - started) / flightDuration);
+        const eased = progress * progress * progress * (progress * (progress * 6 - 15) + 10);
+        camera.position.lerpVectors(startPosition, endPosition, eased);
+        this.viewer.controls.target.lerpVectors(startTarget, endTarget, eased);
+        camera.lookAt(this.viewer.controls.target);
+        if (progress < 1) requestAnimationFrame(animate);
+        else {
+          this.viewer.controls.update();
+          this.viewer.controls.enabled = controlsWereEnabled;
+          this.cameraAnimationControlsWereEnabled = null;
+          resolve(true);
+        }
+      };
+      requestAnimationFrame(animate);
+    });
   }
 
   focusNode(nodeId) {

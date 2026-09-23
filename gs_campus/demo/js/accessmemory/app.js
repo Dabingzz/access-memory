@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
 import { analyzeRoadMedia } from './road-analyzer.js';
 import { createDemoState, getSceneData, profiles, scenes } from './data.js';
+import { FirstPersonExplorer } from './first-person-explorer.js';
 import { getPreferencesFromUI, planAccessibleRoute } from './route-planner.js';
 import { renderTopologyMap, SceneOverlay } from './scene-overlay.js';
 
@@ -11,6 +12,7 @@ const requestedScene = new URLSearchParams(location.search).get('scene');
 const activeScene = getSceneData(requestedScene);
 const nodes = activeScene.nodes;
 const facilities = activeScene.facilities;
+const firstPersonAvailable = activeScene.exploration?.enabled !== false;
 const state = createDemoState(activeScene.id);
 const home = {
   position: new THREE.Vector3(...activeScene.home.position),
@@ -19,8 +21,8 @@ const home = {
 let overlay;
 let toastTimer;
 let selectedMedia = null;
-let yaw = 0;
-let pitch = 0;
+let modeTransitionToken = 0;
+let panelWasCollapsed = false;
 
 const viewer = window.accessMemoryViewer = new GaussianSplats3D.Viewer({
   rootElement: $('#viewer-host'),
@@ -32,9 +34,12 @@ const viewer = window.accessMemoryViewer = new GaussianSplats3D.Viewer({
   renderMode: GaussianSplats3D.RenderMode.Always,
   sceneRevealMode: GaussianSplats3D.SceneRevealMode.Instant
 });
+const explorer = new FirstPersonExplorer(viewer, activeScene, updateExploreUI);
 
 function initializeControls() {
   $('#scene-data-label').textContent = activeScene.dataLabel;
+  $('#roam-toggle').disabled = true;
+  $('#roam-toggle').title = firstPersonAvailable ? '进入沿路第一视角' : '该场景近景重建密度不足，请使用快捷观察';
   scenes.forEach(scene => {
     $('#scene-select').add(new Option(scene.label, scene.id, scene.id === activeScene.id, scene.id === activeScene.id));
     const button = document.createElement('button');
@@ -58,6 +63,7 @@ function initializeControls() {
     button.addEventListener('click', () => focusViewpoint(viewpoint));
     $('#viewpoint-buttons').appendChild(button);
   });
+  renderExplorationStops();
 
   $('#scene-select').addEventListener('change', event => switchScene(event.target.value));
   $('#reset-view').addEventListener('click', () => applyHome(true));
@@ -75,7 +81,7 @@ function initializeControls() {
   $$('.tool-rail button').forEach(button => button.addEventListener('click', () => openDrawer(button.dataset.tool)));
   $('#close-drawer').addEventListener('click', closeDrawer);
   $('#panel-toggle').addEventListener('click', toggleNavigationPanel);
-  $('#roam-toggle').addEventListener('click', toggleRoamMode);
+  $('#roam-toggle').addEventListener('click', toggleFirstPersonMode);
   initializeKeyboardMovement();
   initializePointerLook();
 }
@@ -95,7 +101,11 @@ function selectProfile(button) {
   planRoute({ announce: true });
 }
 
-function applyHome(animated = false) {
+async function applyHome(animated = false) {
+  if (state.roamActive) {
+    await exitFirstPersonMode({ returnHome: animated });
+    return;
+  }
   if (animated && overlay) overlay.flyTo(home.position.toArray(), home.target.toArray());
   else {
     viewer.camera.position.copy(home.position);
@@ -106,14 +116,25 @@ function applyHome(animated = false) {
   setActiveViewpoint(null);
 }
 
-function focusViewpoint(viewpoint) {
+async function focusViewpoint(viewpoint) {
+  if (state.roamActive) await exitFirstPersonMode({ returnHome: false });
   setView('3d');
   overlay?.focusViewpoint(viewpoint);
   setActiveViewpoint(viewpoint.key);
   showToast(`已定位：${viewpoint.label}`);
 }
 
-function focusNode(nodeId) {
+async function focusNode(nodeId) {
+  if (state.roamActive) {
+    if (!explorer.hasStop(nodeId)) {
+      showToast('该地点不在当前第一视角探索道路上');
+      return;
+    }
+    const stop = explorer.stops.find(item => item.nodeId === nodeId);
+    await explorer.walkTo(nodeId);
+    showToast(`已沿道路到达：${stop.label}`);
+    return;
+  }
   setView('3d');
   overlay?.focusNode(nodeId);
   setActiveViewpoint(null);
@@ -130,7 +151,7 @@ function setView(view) {
   $('#map-2d').setAttribute('aria-hidden', String(!is2d));
   $('#poi-layer').style.visibility = is2d ? 'hidden' : 'visible';
   $$('.view-switch button').forEach(button => button.classList.toggle('is-active', button.dataset.view === view));
-  if (is2d && state.roamActive) toggleRoamMode();
+  if (is2d && state.roamActive) exitFirstPersonMode();
 }
 
 function planRoute({ announce = false, reroute = false } = {}) {
@@ -201,22 +222,83 @@ function toggleNavigationPanel() {
   $('#panel-toggle').title = collapsed ? '展开路线面板' : '收起路线面板';
 }
 
-function toggleRoamMode() {
-  state.roamActive = !state.roamActive;
-  $('#app').classList.toggle('roam-mode', state.roamActive);
-  $('#app').classList.toggle('panel-collapsed', state.roamActive);
-  $('#roam-toggle').setAttribute('aria-pressed', String(state.roamActive));
-  $('#roam-toggle').textContent = state.roamActive ? '退出漫游' : '进入漫游';
-  $('#roam-hud').setAttribute('aria-hidden', String(!state.roamActive));
-  $('#crosshair').setAttribute('aria-hidden', String(!state.roamActive));
-  viewer.controls.enabled = !state.roamActive;
-  if (state.roamActive) {
-    syncLookAngles();
-    showToast('漫游已开启，点击场景后移动鼠标控制视角');
-  } else {
-    if (document.pointerLockElement) document.exitPointerLock();
-    $('#panel-toggle').textContent = '‹';
+function renderExplorationStops() {
+  $('#explore-stops').innerHTML = explorer.stops.map(stop => `
+    <button type="button" data-explore-node="${stop.nodeId}" data-status="${stop.status}" title="${stop.detail}">
+      <i></i><span>${stop.label}</span>
+    </button>`).join('');
+  $$('[data-explore-node]').forEach(button => button.addEventListener('click', async () => {
+    const stop = explorer.stops.find(item => item.nodeId === button.dataset.exploreNode);
+    await explorer.walkTo(stop.nodeId);
+    showToast(`已沿道路到达：${stop.label}`);
+  }));
+}
+
+function updateExploreUI(snapshot, arrivedStop = null) {
+  const stop = arrivedStop || snapshot.nearestStop;
+  $('#explore-progress').style.width = `${Math.round(snapshot.progress * 100)}%`;
+  if (stop) {
+    $('#explore-current').textContent = stop.label;
+    $('#explore-detail').textContent = stop.detail;
   }
+  $$('[data-explore-node]').forEach(button => {
+    button.classList.toggle('is-active', button.dataset.exploreNode === stop?.nodeId);
+  });
+}
+
+function setFirstPersonUI(active) {
+  $('#app').classList.toggle('roam-mode', active);
+  $('#app').classList.toggle('first-person-mode', active);
+  $('#roam-toggle').setAttribute('aria-pressed', String(active));
+  $('#roam-toggle').textContent = active ? '退出第一视角' : '第一视角';
+  $('#roam-hud').setAttribute('aria-hidden', String(!active));
+  $('#crosshair').setAttribute('aria-hidden', String(!active));
+  $('#explore-route').setAttribute('aria-hidden', String(!active));
+  $('#control-hint').textContent = active ? '第一视角 · 沿已核验道路探索' : 'WASD 移动 · 鼠标观察';
+}
+
+async function enterFirstPersonMode() {
+  if (!firstPersonAvailable) { showToast('该场景请使用快捷观察，第一视角已用于两条清晰室外道路'); return; }
+  if (!overlay || state.roamActive) return;
+  const token = ++modeTransitionToken;
+  setView('3d');
+  closeDrawer();
+  panelWasCollapsed = $('#app').classList.contains('panel-collapsed');
+  state.roamActive = true;
+  setFirstPersonUI(true);
+  $('#app').classList.add('panel-collapsed');
+  $('#panel-toggle').textContent = '›';
+  viewer.controls.enabled = false;
+  viewer.splatMesh.setSplatScale(activeScene.exploration.splatScale || activeScene.splatScale || 1);
+  overlay.setExplorationMode(true, explorer.stops);
+  const pose = explorer.startPose();
+  updateExploreUI(explorer.snapshot());
+  await overlay.flyTo(pose.position.toArray(), pose.target.toArray(), 1350);
+  if (token !== modeTransitionToken || !state.roamActive) return;
+  explorer.activate();
+  showToast(`已进入${activeScene.exploration.label}`);
+}
+
+async function exitFirstPersonMode({ returnHome = true } = {}) {
+  if (!state.roamActive) return;
+  const token = ++modeTransitionToken;
+  state.roamActive = false;
+  explorer.deactivate();
+  if (document.pointerLockElement) document.exitPointerLock();
+  setFirstPersonUI(false);
+  overlay?.setExplorationMode(false);
+  viewer.splatMesh.setSplatScale(activeScene.splatScale || 1);
+  viewer.controls.enabled = false;
+  if (returnHome && overlay) await overlay.flyTo(home.position.toArray(), home.target.toArray(), 1350);
+  if (token !== modeTransitionToken) return;
+  viewer.controls.enabled = true;
+  if (!panelWasCollapsed) $('#app').classList.remove('panel-collapsed');
+  $('#panel-toggle').textContent = $('#app').classList.contains('panel-collapsed') ? '›' : '‹';
+}
+
+function toggleFirstPersonMode() {
+  if (state.roamActive) exitFirstPersonMode();
+  else enterFirstPersonMode();
 }
 
 function initializePointerLook() {
@@ -225,22 +307,8 @@ function initializePointerLook() {
   });
   document.addEventListener('mousemove', event => {
     if (!state.roamActive || document.pointerLockElement !== viewer.renderer.domElement) return;
-    yaw -= event.movementX * 0.0022;
-    pitch = THREE.MathUtils.clamp(pitch - event.movementY * 0.0022, -1.25, 1.25);
-    updatePointerLook();
+    explorer.look(event.movementX, event.movementY);
   });
-}
-
-function syncLookAngles() {
-  const direction = new THREE.Vector3(); viewer.camera.getWorldDirection(direction);
-  yaw = Math.atan2(direction.x, direction.z);
-  pitch = Math.asin(THREE.MathUtils.clamp(-direction.y, -1, 1));
-}
-
-function updatePointerLook() {
-  const direction = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
-  viewer.controls.target.copy(viewer.camera.position).add(direction.multiplyScalar(12));
-  viewer.camera.lookAt(viewer.controls.target);
 }
 
 function openDrawer(tool) {
@@ -364,7 +432,7 @@ function initializeKeyboardMovement() {
     if (movementKeys.includes(key)) { pressed.add(key); event.preventDefault(); }
     if (/^[1-4]$/.test(key)) focusViewpoint(activeScene.viewpoints[Number(key) - 1]);
     if (key === 'r') applyHome(true);
-    if (key === 'm') toggleRoamMode();
+    if (key === 'm') toggleFirstPersonMode();
   });
   addEventListener('keyup', event => pressed.delete(event.key.toLowerCase()));
   addEventListener('blur', () => pressed.clear());
@@ -373,16 +441,24 @@ function initializeKeyboardMovement() {
   const tick = now => {
     const delta = Math.min(0.05, (now - previous) / 1000); previous = now;
     if (pressed.size && viewer.camera && viewer.controls) {
+      if (state.roamActive) {
+        const forwardInput = Number(pressed.has('w')) - Number(pressed.has('s'));
+        const sidewaysInput = Number(pressed.has('d')) - Number(pressed.has('a'));
+        explorer.move(forwardInput, sidewaysInput, delta, pressed.has('shift'));
+        requestAnimationFrame(tick);
+        return;
+      }
       viewer.camera.getWorldDirection(forward); forward.y = 0; forward.normalize();
       right.crossVectors(forward, up).normalize(); movement.set(0, 0, 0);
       if (pressed.has('w')) movement.add(forward); if (pressed.has('s')) movement.sub(forward);
       if (pressed.has('d')) movement.add(right); if (pressed.has('a')) movement.sub(right);
       if (pressed.has('e')) movement.add(up); if (pressed.has('q')) movement.sub(up);
       if (movement.lengthSq()) {
+        overlay?.cancelCameraAnimation();
         const speed = activeScene.movementSpeed * (pressed.has('shift') ? 3 : 1) * delta * 60;
         movement.normalize().multiplyScalar(speed);
         viewer.camera.position.add(movement); viewer.controls.target.add(movement);
-        if (state.roamActive) updatePointerLook(); else viewer.controls.update();
+        viewer.controls.update();
       }
     }
     requestAnimationFrame(tick);
@@ -413,8 +489,13 @@ async function loadScene() {
     await viewer.addSplatScene(encodeURI(activeScene.file), { progressiveLoad: false, showLoadingUI: false });
     viewer.splatMesh.setSplatScale(activeScene.splatScale || 1);
     viewer.renderer.setClearColor(0x161817, 1); applyHome(); viewer.start();
+    viewer.controls.enableDamping = true;
+    viewer.controls.dampingFactor = 0.08;
+    viewer.controls.rotateSpeed = 0.55;
+    viewer.controls.zoomSpeed = 0.7;
     overlay = new SceneOverlay(viewer, $('#poi-layer'), activeScene, focusNode);
     overlay.configure(); planRoute(); updateRiskCount();
+    $('#roam-toggle').disabled = !firstPersonAvailable;
     setTimeout(() => $('#loading').classList.add('is-hidden'), 350);
   } catch (error) {
     console.error(error); $('#loading-message').textContent = '场景载入失败，请从仓库根目录启动本地服务器';
