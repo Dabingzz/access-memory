@@ -65,7 +65,7 @@ AccessMemory 面向轮椅使用者、低视力与全盲用户，以及其他行�
             └── scene-overlay.js
 ```
 
-`gs_campus/` 前身为“小蓝鲸”南大 3D 校园地图，本项目复用了其 Gaussian Splatting 渲染与基础相机能力；`cloud-nanjing-university-tour/` 前身为校园导览展示页，现已改造为 AccessMemory 产品展示页。
+`gs_campus/` 提供 Gaussian Splatting 渲染与相机交互能力；`cloud-nanjing-university-tour/` 提供 AccessMemory 产品展示页。
 
 ## 快速开始
 
