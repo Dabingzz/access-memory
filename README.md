@@ -165,6 +165,8 @@ npm run dev
 
 ## 开发与验证
 
+完整功能测试记录、浏览器实测结果与截图证据见 [TEST_REPORT.md](./TEST_REPORT.md)。
+
 展示页构建：
 
 ```bash
