@@ -1,4 +1,4 @@
-import { nodes, profiles, ROAD_STATUS } from './data.js';
+import { profiles, ROAD_STATUS } from './data.js';
 
 function isForbidden(edge, profile, preferences) {
   if (edge.status === ROAD_STATUS.BLOCKED) return true;
@@ -18,7 +18,7 @@ function weightedCost(edge, profile, preferences) {
   return edge.length * factor;
 }
 
-export function planAccessibleRoute({ edges, origin, destination, profileId, preferences }) {
+export function planAccessibleRoute({ edges, nodes, origin, destination, profileId, preferences }) {
   const profile = profiles[profileId] || profiles.wheelchair;
   const adjacency = new Map();
   Object.keys(nodes).forEach(id => adjacency.set(id, []));
@@ -79,14 +79,12 @@ export function planAccessibleRoute({ edges, origin, destination, profileId, pre
       hasCaution ? { text: '1 处谨慎路段', warn: true } : { text: '路况已核验' },
       ...(hasUnknown ? [{ text: '含待确认路段', warn: true }] : [])
     ],
-    steps: buildSteps(routeNodes, routeEdges),
-    lastMeter: destination === 'venue'
-      ? '从东侧缓坡接近会场，沿右侧无台阶通道进入；玻璃门左侧为低位自动开门按钮。'
-      : `抵达${nodes[destination].label}后，跟随蓝色入口标识进入。`
+    steps: buildSteps(routeNodes, routeEdges, nodes),
+    lastMeter: nodes[destination].lastMeter || `抵达${nodes[destination].label}后，跟随蓝色地点标识进入。`
   };
 }
 
-function buildSteps(routeNodes, routeEdges) {
+function buildSteps(routeNodes, routeEdges, nodes) {
   return routeEdges.map((edge, index) => {
     const target = nodes[routeNodes[index + 1]];
     let instruction = `沿${edge.label}前往${target.short}`;

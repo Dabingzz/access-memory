@@ -27,8 +27,13 @@
         <button class="icon-button" id="fullscreen" type="button" title="全屏">⛶</button>
       </div>
     </header>
+    <nav class="scene-switcher" id="scene-switcher" aria-label="切换独立三维场景"></nav>
+    <div class="viewpoint-bar" aria-label="快速观察点">
+      <span>快速观察</span><div id="viewpoint-buttons"></div>
+      <button class="roam-button" id="roam-toggle" type="button" aria-pressed="false">进入漫游</button>
+    </div>
     <aside class="navigation-panel" aria-label="无障碍路线规划">
-      <div class="panel-heading"><span class="live-dot"></span><span>栖霞园区道路数据</span><time id="data-time">刚刚更新</time></div>
+      <div class="panel-heading"><span class="live-dot"></span><span id="scene-data-label">场景道路数据</span><time id="data-time">刚刚更新</time><button id="panel-toggle" type="button" title="收起路线面板">‹</button></div>
       <section class="route-form">
         <div class="route-field"><span class="field-node start"></span><label for="origin">起点</label><select id="origin"></select></div><div class="route-connector"></div>
         <div class="route-field"><span class="field-node end"></span><label for="destination">终点</label><select id="destination"></select></div>
@@ -51,6 +56,8 @@
     </nav>
     <aside class="tool-drawer" id="tool-drawer" aria-hidden="true"><div class="drawer-head"><div><span id="drawer-kicker">ACCESSIBILITY DATA</span><h2 id="drawer-title">附近设施</h2></div><button class="icon-button" id="close-drawer" type="button" title="关闭">×</button></div><div class="drawer-content" id="drawer-content"></div></aside>
     <div class="status-strip"><div class="legend"><span><i class="open"></i>可通行</span><span><i class="caution"></i>谨慎</span><span><i class="blocked"></i>阻断</span><span><i class="unknown"></i>待确认</span></div><div class="scene-credit"><b>INSTA360 X5</b><span>AHOLO 实景重建</span></div><div class="control-hint">WASD 移动 · 鼠标观察</div></div>
+    <div class="roam-hud" id="roam-hud" aria-hidden="true"><div class="key-grid"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div><p><b>点击画面控制视角</b><span>WASD 移动 · Q/E 升降 · Shift 加速 · Esc 释放鼠标</span></p></div>
+    <div class="crosshair" id="crosshair" aria-hidden="true"></div>
     <div class="road-alert" id="road-alert" role="status" aria-live="assertive" hidden><span class="alert-code">ROUTE UPDATE</span><strong id="alert-title">检测到道路阻断</strong><p id="alert-message">道路 B 已暂停通行，正在重新规划。</p></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="loading" id="loading" role="status"><div class="loading-mark">路</div><div><strong>正在进入栖霞园区</strong><span id="loading-message">载入 X5 实景重建数据</span></div><div class="loading-line"><i></i></div></div>
