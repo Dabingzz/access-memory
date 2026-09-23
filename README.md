@@ -30,20 +30,7 @@ AccessMemory 面向轮椅使用者、低视力与全盲用户，以及其他行�
 
 ## 系统架构
 
-```mermaid
-flowchart LR
-    X5[Insta360 X5] --> AHOLO[AHOLO 三维重建]
-    AHOLO --> SPLAT[Gaussian Splat 场景]
-    ULTRA[GO Ultra / 用户影像] --> VLM[路况分析接口]
-    REPORT[用户主动上报] --> STATE[动态道路状态]
-    VLM --> STATE
-    SPLAT --> MAP[AccessMemory 地图体验]
-    STATE --> ROUTER[无障碍路线规划器]
-    PROFILE[用户通行档案] --> ROUTER
-    ROUTER --> MAP
-    MAP --> NAV[2D / 3D / 第一视角导航]
-    STATE --> INSPECT[风险巡检与报告]
-```
+![AccessMemory 系统架构](./docs/accessmemory-architecture.svg)
 
 影像分析通过统一的 `analyzeRoadMedia(file, profile, context, onProgress)` 接口接入业务层，将识别进度与道路风险结果同步到地图、路线和巡检模块。
 

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title description">
+  <title id="title">AccessMemory 系统架构</title>
+  <desc id="description">从空间与出行数据采集，经三维重建、路况理解和无障碍路线决策，输出二维、三维、第一视角导航和风险巡检。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5f7d86"/>
+    </marker>
+    <style>
+      .title { font: 700 22px "Noto Sans SC", "Microsoft YaHei", sans-serif; fill: #123b47; }
+      .stage { font: 700 14px "Noto Sans SC", "Microsoft YaHei", sans-serif; fill: #476873; }
+      .name { font: 700 16px "Noto Sans SC", "Microsoft YaHei", sans-serif; fill: #123b47; }
+      .detail { font: 400 12px "Noto Sans SC", "Microsoft YaHei", sans-serif; fill: #5f7d86; }
+      .inverse-name { font: 700 16px "Noto Sans SC", "Microsoft YaHei", sans-serif; fill: #ffffff; }
+      .inverse-detail { font: 400 12px "Noto Sans SC", "Microsoft YaHei", sans-serif; fill: #d6edf2; }
+      .edge { fill: none; stroke: #5f7d86; stroke-width: 2; marker-end: url(#arrow); }
+      .edge-dashed { fill: none; stroke: #8aa5ac; stroke-width: 2; stroke-dasharray: 6 6; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="520" rx="8" fill="#f5fbfc"/>
+  <text class="title" x="48" y="46">真实空间到可达导航的数据闭环</text>
+
+  <text class="stage" x="48" y="92">01 数据采集</text>
+  <text class="stage" x="336" y="92">02 空间与路况理解</text>
+  <text class="stage" x="624" y="92">03 可达决策</text>
+  <text class="stage" x="912" y="92">04 产品输出</text>
+
+  <rect x="48" y="116" width="232" height="84" rx="8" fill="#fff5d9" stroke="#e6b64a" stroke-width="2"/>
+  <text class="name" x="68" y="148">Insta360 X5</text>
+  <text class="detail" x="68" y="174">园区全景与真实空间采集</text>
+
+  <rect x="48" y="222" width="232" height="84" rx="8" fill="#e5f3f8" stroke="#65a9c0" stroke-width="2"/>
+  <text class="name" x="68" y="254">GO Ultra / 出行影像</text>
+  <text class="detail" x="68" y="280">第一视角道路与障碍证据</text>
+
+  <rect x="48" y="328" width="232" height="84" rx="8" fill="#eaf7f2" stroke="#67ad91" stroke-width="2"/>
+  <text class="name" x="68" y="360">用户主动上报</text>
+  <text class="detail" x="68" y="386">位置、状态、描述与现场素材</text>
+
+  <rect x="336" y="116" width="232" height="84" rx="8" fill="#e5f3f8" stroke="#65a9c0" stroke-width="2"/>
+  <text class="name" x="356" y="148">AHOLO 三维重建</text>
+  <text class="detail" x="356" y="174">Gaussian Splat 场景</text>
+
+  <rect x="336" y="222" width="232" height="84" rx="8" fill="#e5f3f8" stroke="#65a9c0" stroke-width="2"/>
+  <text class="name" x="356" y="254">道路与障碍理解</text>
+  <text class="detail" x="356" y="280">分析进度、风险类型与置信信息</text>
+
+  <rect x="336" y="328" width="232" height="84" rx="8" fill="#eaf7f2" stroke="#67ad91" stroke-width="2"/>
+  <text class="name" x="356" y="360">动态道路状态</text>
+  <text class="detail" x="356" y="386">可通行 / 谨慎 / 阻断 / 未知</text>
+
+  <rect x="624" y="146" width="232" height="84" rx="8" fill="#fff5d9" stroke="#e6b64a" stroke-width="2"/>
+  <text class="name" x="644" y="178">用户通行档案</text>
+  <text class="detail" x="644" y="204">轮椅 / 低视力 / 全盲与路线偏好</text>
+
+  <rect x="624" y="274" width="232" height="108" rx="8" fill="#0d6172" stroke="#0a4c59" stroke-width="2"/>
+  <text class="inverse-name" x="644" y="310">无障碍路线规划器</text>
+  <text class="inverse-detail" x="644" y="336">约束过滤 + 状态加权</text>
+  <text class="inverse-detail" x="644" y="358">道路变化后自动重新规划</text>
+
+  <rect x="912" y="116" width="240" height="84" rx="8" fill="#0d6172" stroke="#0a4c59" stroke-width="2"/>
+  <text class="inverse-name" x="932" y="148">AccessMemory 地图</text>
+  <text class="inverse-detail" x="932" y="174">场景、地点、设施与路线状态</text>
+
+  <rect x="912" y="222" width="240" height="84" rx="8" fill="#e5f3f8" stroke="#65a9c0" stroke-width="2"/>
+  <text class="name" x="932" y="254">导航体验</text>
+  <text class="detail" x="932" y="280">2D 路网 / 3D 实景 / 第一视角</text>
+
+  <rect x="912" y="328" width="240" height="84" rx="8" fill="#eaf7f2" stroke="#67ad91" stroke-width="2"/>
+  <text class="name" x="932" y="360">风险巡检与报告</text>
+  <text class="detail" x="932" y="386">风险汇总、证据来源与摘要导出</text>
+
+  <path class="edge" d="M280 158 H336"/>
+  <path class="edge" d="M280 264 H336"/>
+  <path class="edge" d="M280 370 H336"/>
+  <path class="edge" d="M452 306 V328"/>
+  <path class="edge" d="M568 370 H594 Q608 370 608 356 V342 Q608 328 624 328"/>
+  <path class="edge" d="M740 230 V274"/>
+  <path class="edge" d="M856 328 H884 Q898 328 898 314 V172 Q898 158 912 158"/>
+  <path class="edge" d="M1032 200 V222"/>
+  <path class="edge" d="M1032 306 V328"/>
+  <path class="edge-dashed" d="M568 158 H884 Q898 158 912 158"/>
+
+  <path d="M336 452 H1152" stroke="#c8dde1" stroke-width="1"/>
+  <circle cx="348" cy="474" r="5" fill="#2dd5e7"/>
+  <text class="detail" x="362" y="479">同一份场景与道路状态驱动地图、导航和巡检视图</text>
+</svg>
