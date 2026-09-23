@@ -145,8 +145,8 @@ export const sceneCatalog = [
       { key: '4', label: '缓坡侧门', target: [13, 0, -12], position: [31, -11, 10], nodeId: 'ramp' }
     ],
     exploration: {
-      label: '入口景观无障碍步道', eyeHeight: 5, walkSpeed: 7, lateralLimit: 1.8, splatScale: 0.52,
-      path: ['gate', 'dropoff', 'garden', 'fork'], startNodeId: 'dropoff',
+      label: '入口景观无障碍步道', eyeHeight: 4.2, walkSpeed: 7, lateralLimit: 1.8, splatScale: 0.52,
+      path: ['gate', 'dropoff', 'garden', 'fork'], startNodeId: 'gate',
       stops: [
         { nodeId: 'gate', label: '园区入口', status: 'open', detail: '右侧平缓路缘' },
         { nodeId: 'dropoff', label: '无台阶落客', status: 'open', detail: '车辆接驳后可平层进入' },
@@ -170,7 +170,7 @@ export const sceneCatalog = [
       { key: '4', label: '电梯前厅', target: [39, 0, 8], position: [81, -22, 48], nodeId: 'elevator' }
     ],
     exploration: {
-      enabled: false, label: '酒店平层连廊', eyeHeight: 4.5, walkSpeed: 6, lateralLimit: 1.4, splatScale: 0.48,
+      enabled: false, label: '酒店平层连廊', eyeHeight: 4, walkSpeed: 6, lateralLimit: 1.4, splatScale: 0.48,
       path: ['west', 'gardenDoor', 'restNook', 'mid', 'turn', 'service', 'restroom', 'elevator', 'guestWing'], startNodeId: 'gardenDoor',
       stops: [
         { nodeId: 'gardenDoor', label: '平层玻璃门', status: 'open', detail: '庭院侧无台阶入口' },
@@ -195,7 +195,7 @@ export const sceneCatalog = [
       { key: '4', label: '东侧连廊', target: [30, 0, -7], position: [72, -26, 33], nodeId: 'eastHall' }
     ],
     exploration: {
-      enabled: false, label: '内庭无台阶环廊', eyeHeight: 4.5, walkSpeed: 5.5, lateralLimit: 1.5, splatScale: 0.46,
+      enabled: false, label: '内庭无台阶环廊', eyeHeight: 4, walkSpeed: 5.5, lateralLimit: 1.5, splatScale: 0.46,
       path: ['lobby', 'gallery', 'atrium', 'turning', 'eastHall'], startNodeId: 'gallery',
       stops: [
         { nodeId: 'lobby', label: '大堂平层接口', status: 'open', detail: '室内外连续通行' },
@@ -220,7 +220,7 @@ export const sceneCatalog = [
       { key: '4', label: '园林小桥', target: [12, 0, 48], position: [37, -14, 73], nodeId: 'bridge' }
     ],
     exploration: {
-      label: '湖畔无障碍主步道', eyeHeight: 5, walkSpeed: 7, lateralLimit: 2, splatScale: 0.52,
+      label: '湖畔无障碍主步道', eyeHeight: 4.2, walkSpeed: 7, lateralLimit: 2, splatScale: 0.52,
       path: ['hotel', 'ramp', 'gazebo', 'bend', 'shore', 'deck', 'guardrail', 'eastGate'], startNodeId: 'ramp',
       stops: [
         { nodeId: 'ramp', label: '园林缓坡', status: 'open', detail: '入口无台阶接驳' },
@@ -249,6 +249,7 @@ export function createDemoState(sceneId) {
     edges: scene.edges.map(item => ({ ...item, tags: [...item.tags] })),
     risks: scene.risks.map(item => ({ ...item })),
     profile: 'wheelchair', origin: scene.defaultRoute[0], destination: scene.defaultRoute[1],
-    currentRoute: null, voiceEnabled: false, analyzed: false, roamActive: false
+    currentRoute: null, voiceEnabled: false, analyzed: false, roamActive: false,
+    navigationActive: false, navigationIndex: 0, navigationMoving: false
   };
 }

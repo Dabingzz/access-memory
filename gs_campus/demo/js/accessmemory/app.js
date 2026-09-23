@@ -78,6 +78,7 @@ function initializeControls() {
   $('#care-toggle').addEventListener('click', toggleCareMode);
   $('#voice-toggle').addEventListener('click', toggleVoice);
   $('#start-navigation').addEventListener('click', startNavigation);
+  $('#navigation-next').addEventListener('click', advanceNavigation);
   $$('.tool-rail button').forEach(button => button.addEventListener('click', () => openDrawer(button.dataset.tool)));
   $('#close-drawer').addEventListener('click', closeDrawer);
   $('#panel-toggle').addEventListener('click', toggleNavigationPanel);
@@ -128,6 +129,10 @@ async function focusNode(nodeId) {
   if (state.roamActive) {
     if (!explorer.hasStop(nodeId)) {
       showToast('该地点不在当前第一视角探索道路上');
+      return;
+    }
+    if (state.navigationActive) {
+      await navigateToIndex(state.currentRoute.nodes.indexOf(nodeId));
       return;
     }
     const stop = explorer.stops.find(item => item.nodeId === nodeId);
@@ -185,20 +190,119 @@ function renderRoute(route, reroute) {
   $('#last-meter-text').textContent = route.lastMeter;
 }
 
-function startNavigation(event) {
+async function startNavigation(event) {
+  if (state.navigationActive) {
+    await stopNavigation();
+    return;
+  }
   if (!state.currentRoute) planRoute();
   if (!state.currentRoute || !state.currentRoute.steps.length) return;
-  const active = event.currentTarget.dataset.active === 'true';
-  event.currentTarget.dataset.active = String(!active);
-  event.currentTarget.textContent = active ? '开始导航与语音指引' : '导航中 · 点击结束';
-  if (!active) {
-    state.voiceEnabled = true; $('#voice-toggle').setAttribute('aria-pressed', 'true');
-    const first = state.currentRoute.steps[0];
-    speak(`导航开始。${first.instruction}，继续前行${first.distance}。`);
-    showToast('导航已开始，已启用语音指引');
-  } else {
-    window.speechSynthesis?.cancel(); showToast('导航已结束');
+  const route = state.currentRoute;
+  explorer.configurePath(route.nodes, route.nodes[0], buildNavigationStops(route));
+  state.navigationActive = true;
+  state.navigationIndex = 0;
+  state.navigationMoving = false;
+  renderExplorationStops();
+  event.currentTarget.dataset.active = 'true';
+  event.currentTarget.textContent = '导航中 · 点击结束';
+  state.voiceEnabled = true;
+  $('#voice-toggle').setAttribute('aria-pressed', 'true');
+  const entered = await enterFirstPersonMode({ allowUnavailable: true });
+  if (!entered || !state.navigationActive) {
+    resetNavigationSession();
+    return;
   }
+  updateNavigationUI();
+  const first = route.steps[0];
+  speak(`导航开始，当前位置${nodes[route.nodes[0]].short}。${first.instruction}，继续前行${first.distance}。`);
+  showToast(`已切换到导航起点：${nodes[route.nodes[0]].short}`);
+}
+
+function buildNavigationStops(route) {
+  return route.nodes.map((nodeId, index) => {
+    const roadStatus = route.edges[index - 1]?.status;
+    return {
+      nodeId,
+      label: nodes[nodeId].short,
+      status: roadStatus === 'CAUTION' || roadStatus === 'UNKNOWN' ? 'caution' : 'open',
+      detail: index === 0 ? '导航起点' : `${route.steps[index - 1].instruction} · ${route.steps[index - 1].distance}`
+    };
+  });
+}
+
+async function advanceNavigation() {
+  if (!state.navigationActive || state.navigationMoving) return;
+  await navigateToIndex(state.navigationIndex + 1);
+}
+
+async function navigateToIndex(index) {
+  const route = state.currentRoute;
+  if (state.navigationMoving || !route || index < 0 || index >= route.nodes.length || index === state.navigationIndex) return;
+  state.navigationMoving = true;
+  const nextButton = $('#navigation-next');
+  nextButton.disabled = true;
+  $('#navigation-next-label').textContent = `前往${nodes[route.nodes[index]].short}…`;
+  const arrived = await explorer.walkTo(route.nodes[index]);
+  state.navigationMoving = false;
+  if (!arrived || !state.navigationActive) {
+    updateNavigationUI();
+    return;
+  }
+  state.navigationIndex = index;
+  updateNavigationUI();
+  const current = nodes[route.nodes[index]];
+  if (index === route.nodes.length - 1) {
+    speak(`已到达${current.label}。${route.lastMeter}`);
+    showToast(`已到达终点：${current.short}`);
+    return;
+  }
+  const nextStep = route.steps[index];
+  speak(`已到达${current.short}。${nextStep.instruction}，继续前行${nextStep.distance}。`);
+  showToast(`已到达${current.short}，可继续前往下一节点`);
+}
+
+function updateNavigationUI() {
+  if (!state.navigationActive || !state.currentRoute) return;
+  const route = state.currentRoute;
+  const index = state.navigationIndex;
+  const current = nodes[route.nodes[index]];
+  const finished = index >= route.nodes.length - 1;
+  $('#explore-current').textContent = current.short;
+  $('#explore-detail').textContent = finished
+    ? `已到达 · ${route.lastMeter}`
+    : `节点 ${index + 1}/${route.nodes.length} · 下一段 ${route.steps[index].distance}`;
+  $$('[data-explore-node]').forEach(button => {
+    button.classList.toggle('is-active', button.dataset.exploreNode === route.nodes[index]);
+  });
+  const nextButton = $('#navigation-next');
+  nextButton.hidden = false;
+  nextButton.disabled = finished || state.navigationMoving;
+  nextButton.classList.toggle('is-complete', finished);
+  $('#navigation-next-label').textContent = finished ? '已到达终点' : `前往${nodes[route.nodes[index + 1]].short}`;
+}
+
+function resetNavigationSession() {
+  state.navigationActive = false;
+  state.navigationIndex = 0;
+  state.navigationMoving = false;
+  const startButton = $('#start-navigation');
+  startButton.dataset.active = 'false';
+  startButton.textContent = '开始导航与语音指引';
+  const nextButton = $('#navigation-next');
+  nextButton.hidden = true;
+  nextButton.disabled = false;
+  nextButton.classList.remove('is-complete');
+}
+
+async function stopNavigation() {
+  resetNavigationSession();
+  window.speechSynthesis?.cancel();
+  if (state.roamActive) await exitFirstPersonMode();
+  else {
+    explorer.resetPath();
+    renderExplorationStops();
+  }
+  showToast('导航已结束');
 }
 
 function toggleCareMode(event) {
@@ -229,14 +333,19 @@ function renderExplorationStops() {
     </button>`).join('');
   $$('[data-explore-node]').forEach(button => button.addEventListener('click', async () => {
     const stop = explorer.stops.find(item => item.nodeId === button.dataset.exploreNode);
-    await explorer.walkTo(stop.nodeId);
-    showToast(`已沿道路到达：${stop.label}`);
+    if (state.navigationActive) {
+      await navigateToIndex(state.currentRoute.nodes.indexOf(stop.nodeId));
+    } else {
+      await explorer.walkTo(stop.nodeId);
+      showToast(`已沿道路到达：${stop.label}`);
+    }
   }));
 }
 
 function updateExploreUI(snapshot, arrivedStop = null) {
-  const stop = arrivedStop || snapshot.nearestStop;
   $('#explore-progress').style.width = `${Math.round(snapshot.progress * 100)}%`;
+  if (state.navigationActive) return;
+  const stop = arrivedStop || snapshot.nearestStop;
   if (stop) {
     $('#explore-current').textContent = stop.label;
     $('#explore-detail').textContent = stop.detail;
@@ -249,6 +358,7 @@ function updateExploreUI(snapshot, arrivedStop = null) {
 function setFirstPersonUI(active) {
   $('#app').classList.toggle('roam-mode', active);
   $('#app').classList.toggle('first-person-mode', active);
+  $('#roam-toggle').disabled = active ? false : !firstPersonAvailable;
   $('#roam-toggle').setAttribute('aria-pressed', String(active));
   $('#roam-toggle').textContent = active ? '退出第一视角' : '第一视角';
   $('#roam-hud').setAttribute('aria-hidden', String(!active));
@@ -257,33 +367,41 @@ function setFirstPersonUI(active) {
   $('#control-hint').textContent = active ? '第一视角 · 沿已核验道路探索' : 'WASD 移动 · 鼠标观察';
 }
 
-async function enterFirstPersonMode() {
-  if (!firstPersonAvailable) { showToast('该场景请使用快捷观察，第一视角已用于两条清晰室外道路'); return; }
-  if (!overlay || state.roamActive) return;
+async function enterFirstPersonMode({ allowUnavailable = false } = {}) {
+  if (!firstPersonAvailable && !allowUnavailable) { showToast('该场景请使用快捷观察，第一视角已用于两条清晰室外道路'); return false; }
+  if (!overlay) return false;
   const token = ++modeTransitionToken;
   setView('3d');
   closeDrawer();
-  panelWasCollapsed = $('#app').classList.contains('panel-collapsed');
-  state.roamActive = true;
-  setFirstPersonUI(true);
-  $('#app').classList.add('panel-collapsed');
-  $('#panel-toggle').textContent = '›';
+  if (!state.roamActive) {
+    panelWasCollapsed = $('#app').classList.contains('panel-collapsed');
+    state.roamActive = true;
+    setFirstPersonUI(true);
+    $('#app').classList.add('panel-collapsed');
+    $('#panel-toggle').textContent = '›';
+  } else {
+    explorer.deactivate();
+  }
   viewer.controls.enabled = false;
   viewer.splatMesh.setSplatScale(activeScene.exploration.splatScale || activeScene.splatScale || 1);
   overlay.setExplorationMode(true, explorer.stops);
   const pose = explorer.startPose();
   updateExploreUI(explorer.snapshot());
   await overlay.flyTo(pose.position.toArray(), pose.target.toArray(), 1350);
-  if (token !== modeTransitionToken || !state.roamActive) return;
+  if (token !== modeTransitionToken || !state.roamActive) return false;
   explorer.activate();
-  showToast(`已进入${activeScene.exploration.label}`);
+  if (!state.navigationActive) showToast(`已进入${activeScene.exploration.label}`);
+  return true;
 }
 
 async function exitFirstPersonMode({ returnHome = true } = {}) {
   if (!state.roamActive) return;
   const token = ++modeTransitionToken;
+  if (state.navigationActive) resetNavigationSession();
   state.roamActive = false;
   explorer.deactivate();
+  explorer.resetPath();
+  renderExplorationStops();
   if (document.pointerLockElement) document.exitPointerLock();
   setFirstPersonUI(false);
   overlay?.setExplorationMode(false);
@@ -297,8 +415,14 @@ async function exitFirstPersonMode({ returnHome = true } = {}) {
 }
 
 function toggleFirstPersonMode() {
-  if (state.roamActive) exitFirstPersonMode();
-  else enterFirstPersonMode();
+  if (state.roamActive) {
+    if (state.navigationActive) stopNavigation();
+    else exitFirstPersonMode();
+  } else {
+    explorer.resetPath();
+    renderExplorationStops();
+    enterFirstPersonMode();
+  }
 }
 
 function initializePointerLook() {

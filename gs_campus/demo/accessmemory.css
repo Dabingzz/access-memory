@@ -52,3 +52,12 @@
 .roam-hud kbd:nth-child(1){grid-column:2;grid-row:1}.roam-hud kbd:nth-child(2){grid-column:1;grid-row:2}.roam-hud kbd:nth-child(3){grid-column:2;grid-row:2}.roam-hud kbd:nth-child(4){grid-column:3;grid-row:2}
 .first-person-mode .navigation-panel{transform:translateX(calc(-100% - 24px));box-shadow:none}.first-person-mode .poi-layer{left:0}
 @media(max-width:900px){.first-person-mode .roam-hud{right:72px}}
+
+/* Unified map controls and guided navigation */
+.map-controls{position:fixed;z-index:31;top:24px;left:50%;display:flex;align-items:center;gap:7px;transform:translateX(-50%)}
+.map-controls .scene-switcher{position:static;transform:none}
+.explore-route{grid-template-columns:158px minmax(0,1fr) auto}
+.explore-next{position:relative;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-content:center;column-gap:10px;min-width:154px;padding:7px 12px;border:0;border-left:1px solid #4b4e47;background:#1468ff;color:#fff;text-align:left}
+.explore-next span{font-size:8px;opacity:.75}.explore-next strong{max-width:118px;overflow:hidden;font-size:10px;text-overflow:ellipsis;white-space:nowrap}.explore-next b{grid-column:2;grid-row:1/3;align-self:center;font-size:17px}.explore-next:hover{background:#0756d9}.explore-next:disabled{cursor:default;opacity:.72}.explore-next.is-complete{background:#176d50}
+@media(max-width:1400px){.scene-switcher button span,.scene-select{display:none}}
+@media(max-width:900px){.map-controls{position:fixed;inset:0;display:block;transform:none;pointer-events:none}.map-controls>*{pointer-events:auto}.map-controls .view-switch{position:absolute;top:13px;left:clamp(70px,22vw,86px)}.map-controls .scene-switcher{position:absolute;top:64px;right:72px;left:68px;justify-content:center;transform:none}.explore-route{grid-template-columns:112px minmax(0,1fr) auto}.explore-next{min-width:118px;padding:6px 9px}.explore-next strong{max-width:86px;font-size:9px}}

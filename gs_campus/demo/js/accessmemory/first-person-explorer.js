@@ -14,20 +14,7 @@ export class FirstPersonExplorer {
     this.pitch = 0;
     this.animationToken = 0;
     this.active = false;
-
-    const points = this.config.path.map(id => {
-      const point = new THREE.Vector3(...this.nodes[id].position);
-      point.y -= this.config.eyeHeight;
-      return point;
-    });
-    this.curve = new THREE.CatmullRomCurve3(points, false, 'centripetal', 0.5);
-    this.length = this.curve.getLength();
-    this.stationDistances = this.buildStationDistances(points);
-    this.distance = this.stationDistances.get(this.config.startNodeId) ?? 0;
-    this.stops = this.config.stops.map(stop => ({
-      ...stop,
-      distance: this.stationDistances.get(stop.anchorNodeId || stop.nodeId) ?? 0
-    }));
+    this.configurePath(this.config.path, this.config.startNodeId, this.config.stops);
   }
 
   buildStationDistances(points) {
@@ -36,7 +23,34 @@ export class FirstPersonExplorer {
       straightLengths[index] = straightLengths[index - 1] + points[index - 1].distanceTo(points[index]);
     }
     const total = straightLengths.at(-1) || 1;
-    return new Map(this.config.path.map((id, index) => [id, (straightLengths[index] / total) * this.length]));
+    return new Map(this.path.map((id, index) => [id, (straightLengths[index] / total) * this.length]));
+  }
+
+  configurePath(path, startNodeId = path[0], stops = []) {
+    if (path.length < 2) throw new Error('First-person paths require at least two nodes.');
+    this.cancelAutoWalk();
+    this.path = [...path];
+    this.startNodeId = startNodeId;
+    const points = this.path.map(id => {
+      const point = new THREE.Vector3(...this.nodes[id].position);
+      point.y -= this.config.eyeHeight;
+      return point;
+    });
+    this.curve = new THREE.CatmullRomCurve3(points, false, 'centripetal', 0.5);
+    this.length = this.curve.getLength();
+    this.stationDistances = this.buildStationDistances(points);
+    this.distance = this.stationDistances.get(this.startNodeId) ?? 0;
+    this.stops = stops.map(stop => ({
+      ...stop,
+      distance: this.stationDistances.get(stop.anchorNodeId || stop.nodeId) ?? 0
+    }));
+    this.lateral = 0;
+    this.headingOffset = 0;
+    this.pitch = 0;
+  }
+
+  resetPath() {
+    this.configurePath(this.config.path, this.config.startNodeId, this.config.stops);
   }
 
   hasStop(nodeId) {
@@ -44,7 +58,7 @@ export class FirstPersonExplorer {
   }
 
   startPose() {
-    this.distance = this.stationDistances.get(this.config.startNodeId) ?? 0;
+    this.distance = this.stationDistances.get(this.startNodeId) ?? 0;
     this.lateral = 0;
     this.headingOffset = 0;
     this.pitch = 0;
@@ -105,7 +119,7 @@ export class FirstPersonExplorer {
   look(movementX, movementY) {
     if (!this.active) return;
     this.cancelAutoWalk();
-    this.headingOffset -= movementX * 0.0022;
+    this.headingOffset += movementX * 0.0022;
     this.pitch = THREE.MathUtils.clamp(this.pitch - movementY * 0.0022, -1.05, 1.05);
     this.applyPose();
   }
